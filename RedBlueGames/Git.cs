@@ -63,19 +63,16 @@ namespace RedBlueGames
         /// </summary>
         public static string Run(string arguments)
         {
-            using (var process = new System.Diagnostics.Process())
+            using var process = new System.Diagnostics.Process();
+            var exitCode = process.Run(@"git", arguments, Application.dataPath,
+                out var output, out var errors);
+            process.Dispose();
+            if (exitCode == 0)
             {
-                var exitCode = process.Run(@"git", arguments, Application.dataPath,
-                    out var output, out var errors);
-                if (exitCode == 0)
-                {
-                    return output;
-                }
-                else
-                {
-                    throw new GitException(exitCode, errors);
-                }
+                return output;
             }
+
+            throw new GitException(exitCode, errors);
         }
     }
 }
