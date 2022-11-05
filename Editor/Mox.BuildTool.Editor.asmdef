@@ -1,0 +1,17 @@
+{
+    "name": "Mox.BuildTool.Editor",
+    "rootNamespace": "Build.Editor",
+    "references": [
+        "GUID:ab6456ebda1b64d9cac23d9808f46a97",
+        "GUID:715c911af0af14874930152fa290f110"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

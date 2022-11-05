@@ -51,6 +51,11 @@ namespace RedBlueGames
         public static string Branch => Run(@"rev-parse --abbrev-ref HEAD");
 
         /// <summary>
+        /// The full commit log.
+        /// </summary>
+        public static string CommitLog => Run(@"log");
+
+        /// <summary>
         /// Returns a listing of all uncommitted or untracked (added) files.
         /// </summary>
         public static string Status => Run(@"status --porcelain");
