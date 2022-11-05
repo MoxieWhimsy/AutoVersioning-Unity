@@ -9,7 +9,7 @@ using UnityEngine.UIElements;
 
 namespace Build.Editor
 {
-    public class BuildVersionSettings : ScriptableObject
+    public class VersioningSettings : ScriptableObject
     {
         [SerializeField] private string mainBranchName = "main";
         public string MainBranchName => mainBranchName;
@@ -20,16 +20,16 @@ namespace Build.Editor
         [SerializeField] private int maxPatchesPerMinor = 20;
         public int BranchCommitLimit => branchCommitLimit;
         public int MaxPatchesPerMinor => maxPatchesPerMinor;
-        
-        [SerializeField] private string[] minorTags = {"feat"};
+
+        [SerializeField] private string[] minorTags = { "feat" };
         [SerializeField] private string[] patchTags = { "fix", "asset", "adjust" };
 
         public Regex MinorRegex => new(string.Join('|', minorTags.Select(tag => @$"^{tag}")));
         public Regex PatchRegex => new(string.Join('|', patchTags.Select(tag => @$"^{tag}")));
         public Regex UnionRegex => new(string.Join('|', minorTags.Union(patchTags).Select(tag => @$"^{tag}")));
 
-        [SerializeField] private BuildVersion.NumberType commitCountingStyle = BuildVersion.NumberType.BothMinorAndPatch;
-        public BuildVersion.NumberType CommitCountingStyle => commitCountingStyle;
+        [SerializeField] private Versioning.NumberType commitCountingStyle = Versioning.NumberType.BothMinorAndPatch;
+        public Versioning.NumberType CommitCountingStyle => commitCountingStyle;
 
         public static string MainBranchNameProperty => nameof(mainBranchName);
         public static string NumberOffsetProperty => nameof(numberOffset);
@@ -45,22 +45,22 @@ namespace Build.Editor
             patch = lines.Count(line => PatchRegex.IsMatch(line));
         }
         
-        internal static BuildVersionSettings GetOrCreate()
+        internal static VersioningSettings GetOrCreate()
         {
-            var foundPaths = AssetDatabase.FindAssets($"t:{nameof(BuildVersionSettings)}")
+            var foundPaths = AssetDatabase.FindAssets($"t:{nameof(VersioningSettings)}")
                 .Select(AssetDatabase.GUIDToAssetPath).ToArray();
             if (!foundPaths.Any())
             {
-                var newSettings = CreateInstance<BuildVersionSettings>();
+                var newSettings = CreateInstance<VersioningSettings>();
                 AssetDatabase.CreateAsset(newSettings, DefaultSettingsPath);
                 AssetDatabase.SaveAssets();
             }
 
-            var settings = AssetDatabase.LoadAssetAtPath<BuildVersionSettings>(foundPaths.First()); 
+            var settings = AssetDatabase.LoadAssetAtPath<VersioningSettings>(foundPaths.First()); 
             return settings;
         }
 
-        private static readonly string DefaultSettingsPath = $"Assets/{nameof(BuildVersionSettings)}.asset";
+        private static readonly string DefaultSettingsPath = $"Assets/{nameof(VersioningSettings)}.asset";
         
         internal static SerializedObject GetSerializedSettings()
         {
@@ -79,7 +79,7 @@ namespace Build.Editor
                 // activateHandler is called when the user clicks on the Settings item in the Settings window.
                 activateHandler = (searchContext, rootElement) =>
                 {
-                    var settings = BuildVersionSettings.GetSerializedSettings();
+                    var settings = VersioningSettings.GetSerializedSettings();
                     
                     // rootElement is a VisualElement. If you add any children to it, the OnGUI function
                     // isn't called because the SettingsProvider uses the UIElements drawing framework.
@@ -108,13 +108,13 @@ namespace Build.Editor
                     properties.AddToClassList("property-list");
                     rootElement.Add(properties);
                     
-                    properties.Add(GenPropertyField(BuildVersionSettings.MainBranchNameProperty,
-                        nameof(BuildVersionSettings.MainBranchName), settings));
-                    properties.Add(GenPropertyField(BuildVersionSettings.NumberOffsetProperty, 
+                    properties.Add(GenPropertyField(VersioningSettings.MainBranchNameProperty,
+                        nameof(VersioningSettings.MainBranchName), settings));
+                    properties.Add(GenPropertyField(VersioningSettings.NumberOffsetProperty, 
                         "Build Number Offset", settings));
-                    properties.Add(GenPropertyField(BuildVersionSettings.MinorTagsProperty, "Minor Tags", settings));
-                    properties.Add(GenPropertyField(BuildVersionSettings.PatchTagsProperty, "Patch Tags", settings));
-                    properties.Add(GenPropertyField(BuildVersionSettings.CommitCountingStyleProperty,
+                    properties.Add(GenPropertyField(VersioningSettings.MinorTagsProperty, "Minor Tags", settings));
+                    properties.Add(GenPropertyField(VersioningSettings.PatchTagsProperty, "Patch Tags", settings));
+                    properties.Add(GenPropertyField(VersioningSettings.CommitCountingStyleProperty,
                         "Commit Counting Style", settings));
 
                     var data = VersionData.GetFromResources();

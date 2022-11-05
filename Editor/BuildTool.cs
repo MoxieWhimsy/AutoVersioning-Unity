@@ -22,7 +22,7 @@ namespace Build.Editor
 		
         public static void UpdateMobileBuildNumbers()
         {
-            BuildVersion.GetBuildNumber(out var number);
+            Versioning.GetBuildNumber(out var number);
             PlayerSettings.Android.bundleVersionCode = number;
             PlayerSettings.iOS.buildNumber = $"{number}";
         }
@@ -74,7 +74,7 @@ namespace Build.Editor
         protected static string Version()
         {
             var versionData = VersionData.GetFromResources();
-            return versionData ? versionData.Version : BuildVersion.ShortBundle;
+            return versionData ? versionData.Version : Versioning.ShortBundle;
         }
 
         protected static async Task BuildWithOptions(BuildPlayerOptions buildPlayerOptions)

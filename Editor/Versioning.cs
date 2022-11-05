@@ -7,18 +7,18 @@ using UnityEngine;
 
 namespace Build.Editor
 {
-    public static class BuildVersion
+    public static class Versioning
     {
-        private static string MainBranchName => BuildVersionSettings.GetOrCreate().MainBranchName;
+        private static string MainBranchName => VersioningSettings.GetOrCreate().MainBranchName;
         private const string VersionTagRegex = @"""*v[0-9]*""";
 
-        private static BuildVersionSettings s_cache;
+        private static VersioningSettings s_cache;
 
-        private static BuildVersionSettings Settings
+        private static VersioningSettings Settings
         {
             get
             {
-                if (!s_cache) s_cache = BuildVersionSettings.GetOrCreate();
+                if (!s_cache) s_cache = VersioningSettings.GetOrCreate();
                 return s_cache;
 
             }
@@ -168,7 +168,7 @@ namespace Build.Editor
             }
             catch (GitException exception)
             {
-                Debug.LogError($"{nameof(BuildVersion)}: exit code = {exception.ExitCode}\n{exception.Message}");
+                Debug.LogError($"{nameof(Versioning)}: exit code = {exception.ExitCode}\n{exception.Message}");
                 description = string.Empty;
                 return false;
             }
