@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace Build.Editor
 {
-    public abstract class BuildTool : MonoBehaviour
+    public abstract class ABuildTool : MonoBehaviour
     {
         protected static string[] Scenes => EditorBuildSettings.scenes.Select(s => s.path).ToArray();
         protected static string HomePath => System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile);
