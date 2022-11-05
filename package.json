@@ -1,0 +1,12 @@
+{
+  "name": "moxiewhimsy.build-tool",
+  "displayName": "Build Tool",
+  "author": {
+    "name": "Paul Ping Kohler"
+  },
+  "version": "0.2.0",
+  "unity": "2018.3",
+  "description": "Build Tool and Git Versioning.",
+  "keywords": [],
+  "category": "Unity"
+}
