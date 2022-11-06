@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
++ VersionDisplay is a component to display VersionData to a TextMeshPro Text 
+
 ## [0.2.0] - 2022-11-05
 ### Added
 + ABuildTool provides a template and useful methods for build tools
