@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -64,7 +65,7 @@ namespace Build.Editor
             var writer = new StreamWriter(stream);
             while (result.Count > 0)
             {
-                writer.WriteLineAsync(result.Dequeue());
+                writer.WriteLine(result.Dequeue());
             }
 
             writer.Close();
@@ -164,3 +165,4 @@ namespace Build.Editor
         }
     }
 }
+#endif
