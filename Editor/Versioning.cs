@@ -65,8 +65,69 @@ namespace Build.Editor
             MinorThenPatch,
             MainAndBranch,
         }
+        
+        /// <returns>true as long as output VersionData is usable, not null</returns>
+        internal static bool GetOrCreateVersionData(out VersionData versionData)
+        {
+            if (VersionData.TryGetFromResources(out versionData)) return true;
+            if (!ConfirmCreateNewVersionDataPopup()) return false;
+            SaveNewVersionDataFilePopup(out var path);
+            path = TrimPathToAssetsFolder(path);
+            if (path.Length == 0)
+                return false;
 
+            CreateNewVersionData(out versionData, path);
+            versionData = VersionData.GetFromResources();
 
+            return versionData;
+        }
+		
+        private static bool ConfirmCreateNewVersionDataPopup()
+            => EditorUtility.DisplayDialog("Version Data not found",
+                "Create new version data asset?", "Create New", "Cancel");
+
+        private static void SaveNewVersionDataFilePopup(out string path)
+        {
+            const string defaultVersionDataDirectory = "Assets/Resources/Config";
+            MakeFolderValid(defaultVersionDataDirectory);
+            path = EditorUtility.SaveFilePanel("Save Version Data Asset", defaultVersionDataDirectory, "Version", "asset");
+        }
+
+        private static void CreateNewVersionData(out VersionData versionData, string path)
+        {
+            versionData = ScriptableObject.CreateInstance<VersionData>();
+
+            SplitPath(path, out path, out var filename);
+
+            AssetDatabase.CreateAsset(versionData, $"{path}/{filename}");
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+        }
+        
+        private static void MakeFolderValid(string path)
+        {
+            if (AssetDatabase.IsValidFolder(path)) return;
+            SplitPath(path, out var parent, out var folder);
+
+            MakeFolderValid(parent);
+			
+            AssetDatabase.CreateFolder(parent, folder);
+            AssetDatabase.Refresh();
+        }
+
+        private static void SplitPath(string path, out string folder, out string tail)
+        {
+            var last = path.LastIndexOf('/');
+            folder = path.Substring(0, last);
+            tail = path.Substring(last + 1);
+        }
+
+        private static string TrimPathToAssetsFolder(string path)
+        {
+            var index = path.IndexOf("Assets", System.StringComparison.Ordinal);
+            return index < 0 ? string.Empty : path.Substring(index);
+        }
+        
         private static int CountCommits(string[] lines)
         {
             return Settings.CommitCountingStyle switch
