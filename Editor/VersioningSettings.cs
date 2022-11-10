@@ -82,7 +82,7 @@ namespace Build.Editor
         {
             var provider = new SettingsProvider("Project/Build package", SettingsScope.Project)
             {
-                label = "Build & Version Code",
+                label = "Build Tool & Versioning",
                 // activateHandler is called when the user clicks on the Settings item in the Settings window.
                 activateHandler = (searchContext, rootElement) =>
                 {
