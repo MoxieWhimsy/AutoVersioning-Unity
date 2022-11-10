@@ -16,6 +16,11 @@ namespace Build.Editor
 
         [SerializeField] private int numberOffset = 0;
         public int NumberOffset => numberOffset;
+        [SerializeField] private bool includeBranchCount;
+        [SerializeField] private bool includeStatusChanges;
+        public bool IncludeBranchCount => includeBranchCount;
+        public bool IncludeChanges => includeStatusChanges;
+        
         [SerializeField] private int branchCommitLimit = 100;
         [SerializeField] private int maxPatchesPerMinor = 20;
         public int BranchCommitLimit => branchCommitLimit;
@@ -33,6 +38,8 @@ namespace Build.Editor
 
         public static string MainBranchNameProperty => nameof(mainBranchName);
         public static string NumberOffsetProperty => nameof(numberOffset);
+        public static string IncludeBranchCountProperty => nameof(includeBranchCount);
+        public static string IncludeStatusChangesProperty => nameof(includeStatusChanges);
         public static string MinorTagsProperty => nameof(minorTags);
         public static string PatchTagsProperty => nameof(patchTags);
         public static string CommitCountingStyleProperty => nameof(commitCountingStyle);
@@ -112,6 +119,10 @@ namespace Build.Editor
                         nameof(VersioningSettings.MainBranchName), settings));
                     properties.Add(GenPropertyField(VersioningSettings.NumberOffsetProperty, 
                         "Build Number Offset", settings));
+                    properties.Add(GenPropertyField(VersioningSettings.IncludeBranchCountProperty,
+                        "Include Branch Count in version data", settings));
+                    properties.Add(GenPropertyField(VersioningSettings.IncludeStatusChangesProperty,
+                        "Include Number of Changes in version data", settings));
                     properties.Add(GenPropertyField(VersioningSettings.MinorTagsProperty, "Minor Tags", settings));
                     properties.Add(GenPropertyField(VersioningSettings.PatchTagsProperty, "Patch Tags", settings));
                     properties.Add(GenPropertyField(VersioningSettings.CommitCountingStyleProperty,

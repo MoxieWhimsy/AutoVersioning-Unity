@@ -12,9 +12,8 @@ namespace Build.UX
 		[SerializeField] private bool includeLabels = false;
 		[SerializeField] private bool includeProductName = true;
 		[SerializeField] private bool includeCommitHash = false;
-		[SerializeField] private bool includeBranchCount = false;
 		[SerializeField] private bool includeBuildNumber = true;
-		[SerializeField] private bool includeCommitStatus = true;
+		[SerializeField] private bool includeBonusCounts = true;
 		[SerializeField] private bool includeDebug = true;
 
 		[SerializeField] private VersionData versionData;
@@ -62,9 +61,7 @@ namespace Build.UX
 				version += includeLabels ? $"\nDebug: {versionData.Debug}" : $" {versionData.Debug}"; 
 			if (versionData && includeCommitHash)
 				version += includeLabels ? $"\nHash: {versionData.Hash}" : $" {versionData.Hash}";
-			if (versionData && includeBranchCount)
-				version += includeLabels ? $"\nBranch: {versionData.BranchCount}" : $" {versionData.BranchCount}";
-			if (versionData && includeCommitStatus) version += $"&{versionData.Changes}";
+			if (versionData && includeBonusCounts) version += $"&{versionData.Bonus}";
 			versionText.text = version;
 		}
 		

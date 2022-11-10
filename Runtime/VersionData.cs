@@ -1,6 +1,5 @@
 using System.Linq;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace Build
 {
@@ -17,15 +16,6 @@ namespace Build
 			#endif
 		}
 
-		[FormerlySerializedAs("build")] [SerializeField] private string branchCount;
-		public string BranchCount
-		{
-			get => branchCount;
-			#if UNITY_EDITOR
-			set => branchCount = value;
-			#endif
-		}
-
 		[SerializeField] private int number;
 
 		public int Number
@@ -36,16 +26,6 @@ namespace Build
 			#endif
 		}
 
-		[SerializeField] private int changes;
-
-		public int Changes
-		{
-			get => changes;
-			#if UNITY_EDITOR
-			set => changes = value;
-			#endif
-		}
-		
 		[SerializeField] private string debug;
 
 		public string Debug
@@ -66,13 +46,23 @@ namespace Build
 			#endif
 		}
 
+		[Tooltip("Bonus Counting Fields")]
+		[SerializeField] private string bonus;
+
+		public string Bonus
+		{
+			get => bonus;
+			#if UNITY_EDITOR
+			set => bonus = value;
+			#endif
+		}
+
 		#if UNITY_EDITOR
 		public void ClearAlmostAll()
 		{
 			version = string.Empty;
-			branchCount = string.Empty;
+			bonus = string.Empty;
 			number = 0;
-			changes = 0;
 			hash = string.Empty;
 		}
 		

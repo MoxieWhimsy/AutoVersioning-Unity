@@ -258,17 +258,23 @@ namespace Build.Editor
             {
                 data.Version = memo;
                 data.Hash = hash;
-                data.BranchCount = BranchCount;
             }
 
             if (GetBuildNumber(out var number))
                 data.Number = number;
 
-            data.Changes = GetGitChanges();
-            
+            if (Settings.IncludeBranchCount && Settings.IncludeChanges)
+                data.Bonus = $"Branch: {BranchCount}+{GetGitChanges()}";
+            else if (Settings.IncludeChanges)
+                data.Bonus = $"Changes: {GetGitChanges()}";
+            else if (Settings.IncludeBranchCount)
+                data.Bonus = $"Branch: {BranchCount}";
+            else
+                data.Bonus = string.Empty;
+
             EditorUtility.SetDirty(data);
 			AssetDatabase.SaveAssets();
-			Debug.Log( $"Info, Debug: Filled version data: {data.Version} Build: {data.BranchCount}");
+			Debug.Log( $"Info, Debug: Filled version data: {data.Version} Build: {data.Number}");
             return data;
         }
 

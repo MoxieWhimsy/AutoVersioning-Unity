@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 + Move Update Version Data menu item to top of Version Data submenu
++ Gather optional counts like Branch Count and number of uncommitted Changes into Bonus field  
 
 ### Fixed
 + error from asynchronous writing to linear stream in AddAppUsesExemptEncryption method of ABuildTool  
