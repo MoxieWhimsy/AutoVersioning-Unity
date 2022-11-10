@@ -245,7 +245,7 @@ namespace Build.Editor
             AssetDatabase.SaveAssets();
         }
         
-        [MenuItem("Build/Version Data/Update Version Data (fills most fields)")]
+        [MenuItem("Build/Version Data/Update Version Data (fills most fields)", priority = 0)]
         public static void UpdateVersionDataFromMenu()
         {
             UpdateVersionData();

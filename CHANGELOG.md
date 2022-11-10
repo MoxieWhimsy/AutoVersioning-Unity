@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 + VersionDisplay is a component to display VersionData to a TextMeshPro Text
 + PrebuildVersionUpdate updates the VersionData before each build
 
+### Changed
++ Move Update Version Data menu item to top of Version Data submenu
+
 ### Fixed
 + error from asynchronous writing to linear stream in AddAppUsesExemptEncryption method of ABuildTool  
 
