@@ -20,12 +20,31 @@ namespace Build.Editor
 
         protected static event PreBuildDelegate OnBeforeBuild;
         protected static event PostBuildDelegate OnBuildSucceeded;
-		
+
+        [System.Obsolete("Must specify build targets as parameters")]
         public static void UpdateMobileBuildNumbers()
         {
+            Debug.LogError(
+                $"missing build targets. {nameof(UpdateMobileBuildNumbers)}() calls without params is Obsolete. Please fix this. ");
+        }
+        public static void UpdateMobileBuildNumbers(params BuildTarget[] buildTargets)
+        {
             Versioning.GetBuildNumber(out var number);
-            PlayerSettings.Android.bundleVersionCode = number;
-            PlayerSettings.iOS.buildNumber = $"{number}";
+            foreach (var target in buildTargets)
+            {
+                switch (target)
+                {
+                    case BuildTarget.Android:
+                        PlayerSettings.Android.bundleVersionCode = number;
+                        break;
+                    case BuildTarget.iOS:
+                        PlayerSettings.iOS.buildNumber = $"{number}";
+                        break;
+                    case BuildTarget.tvOS:
+                        PlayerSettings.tvOS.buildNumber = $"{number}";
+                        break;
+                }
+            }
         }
 
         protected static void ArchiveIosBuild(string buildPath, XcodebuildProcess.ProcessOutput callback)
