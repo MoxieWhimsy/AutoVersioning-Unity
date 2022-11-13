@@ -21,7 +21,7 @@ namespace Build.Editor
 		private static void HandleMobileBuildNumber(BuildTarget target)
 		{
 			if (target != BuildTarget.Android && target != BuildTarget.iOS) return;
-			ABuildTool.UpdateMobileBuildNumbers();
+			ABuildTool.UpdateMobileBuildNumbers(target);
 		}
 	}
 }
