@@ -11,7 +11,7 @@ namespace Build.Editor
 {
     public abstract class ABuildTool : MonoBehaviour
     {
-        protected static string[] Scenes => EditorBuildSettings.scenes.Select(s => s.path).ToArray();
+        protected static string[] Scenes => EditorBuildSettings.scenes.Where(s => s.enabled).Select(s => s.path).ToArray();
         protected static string HomePath => System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile);
         
         protected delegate void PreBuildDelegate(BuildPlayerOptions buildPlayerOptions);
