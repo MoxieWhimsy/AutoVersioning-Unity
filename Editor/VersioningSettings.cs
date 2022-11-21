@@ -14,7 +14,7 @@ namespace Build.Editor
         [SerializeField] private string mainBranchName = "main";
         public string MainBranchName => mainBranchName;
 
-        [SerializeField] private int numberOffset = 0;
+        [SerializeField] private int numberOffset;
         public int NumberOffset => numberOffset;
         [SerializeField] private bool includeBranchCount;
         [SerializeField] private bool includeStatusChanges;
@@ -35,7 +35,7 @@ namespace Build.Editor
 
         [SerializeField] private Versioning.NumberType commitCountingStyle = Versioning.NumberType.BothMinorAndPatch;
         public Versioning.NumberType CommitCountingStyle => commitCountingStyle;
-
+        
         public static string MainBranchNameProperty => nameof(mainBranchName);
         public static string NumberOffsetProperty => nameof(numberOffset);
         public static string IncludeBranchCountProperty => nameof(includeBranchCount);
@@ -56,8 +56,7 @@ namespace Build.Editor
         
         internal static VersioningSettings GetOrCreate()
         {
-            var foundPaths = AssetDatabase.FindAssets($"t:{nameof(VersioningSettings)}")
-                .Select(AssetDatabase.GUIDToAssetPath).ToArray();
+            var foundPaths = GetSettingsPaths();
             if (!foundPaths.Any())
             {
                 var newSettings = CreateInstance<VersioningSettings>();
@@ -66,12 +65,15 @@ namespace Build.Editor
                 AssetDatabase.SaveAssets();
             }
 
+            foundPaths = GetSettingsPaths();
+
             var settings = AssetDatabase.LoadAssetAtPath<VersioningSettings>(foundPaths.First()); 
             return settings;
         }
 
         private static string[] GetSettingsPaths() => AssetDatabase.FindAssets($"t:{nameof(VersioningSettings)}")
-        
+            .Select(AssetDatabase.GUIDToAssetPath).ToArray();
+
         internal static SerializedObject GetSerializedSettings()
         {
             return new SerializedObject(GetOrCreate());
@@ -130,23 +132,30 @@ namespace Build.Editor
                     properties.Add(GenPropertyField(VersioningSettings.PatchTagsProperty, "Patch Tags", settings));
                     properties.Add(GenPropertyField(VersioningSettings.CommitCountingStyleProperty,
                         "Commit Counting Style", settings));
-
-                    var data = VersionData.GetFromResources();
-                    title = new Label { text = "Version Data" };
-                    title.AddToClassList("title");
-                    var preview = new VisualElement { style = { flexDirection = FlexDirection.Column } };
-                    preview.AddToClassList("property-list");
-                    preview.Add(new Label(data.Version));
-                    preview.Add(new Label(data.Number.ToString()));
-                    preview.Add(new Label(data.Hash));
-                    var box = new Box();
-                    box.Add(title);
-                    box.Add(preview);
-                    rootElement.Add(box);
+                    AddVersionDataPreview(rootElement);
                 }
             };
 
             return provider;
+        }
+
+        private static void AddVersionDataPreview(VisualElement rootElement)
+        {
+            var data = VersionData.GetFromResources();
+                    
+            if (!data) return;
+            var title = new Label { text = "Version Data" };
+
+            title.AddToClassList("title");
+            var preview = new VisualElement { style = { flexDirection = FlexDirection.Column } };
+            preview.AddToClassList("property-list");
+            preview.Add(new Label(data.Version));
+            preview.Add(new Label(data.Number.ToString()));
+            preview.Add(new Label(data.Hash));
+            var box = new Box();
+            box.Add(title);
+            box.Add(preview);
+            rootElement.Add(box);
         }
 
         private static PropertyField GenPropertyField(string property, string label, SerializedObject bindObject)
