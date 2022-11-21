@@ -43,7 +43,9 @@ namespace Build.Editor
         public static string MinorTagsProperty => nameof(minorTags);
         public static string PatchTagsProperty => nameof(patchTags);
         public static string CommitCountingStyleProperty => nameof(commitCountingStyle);
-
+        
+        private const string DefaultSettingsFolder = "Assets/Editor/Settings";
+        private static readonly string DefaultSettingsPath = $"{DefaultSettingsFolder}/{nameof(VersioningSettings)}.asset";
 
         public void GetMinorAndThenPatch(string[] lines, out int minor, out int patch)
         {
@@ -59,6 +61,7 @@ namespace Build.Editor
             if (!foundPaths.Any())
             {
                 var newSettings = CreateInstance<VersioningSettings>();
+                Versioning.MakeFolderValid(DefaultSettingsFolder);
                 AssetDatabase.CreateAsset(newSettings, DefaultSettingsPath);
                 AssetDatabase.SaveAssets();
             }
@@ -67,7 +70,7 @@ namespace Build.Editor
             return settings;
         }
 
-        private static readonly string DefaultSettingsPath = $"Assets/{nameof(VersioningSettings)}.asset";
+        private static string[] GetSettingsPaths() => AssetDatabase.FindAssets($"t:{nameof(VersioningSettings)}")
         
         internal static SerializedObject GetSerializedSettings()
         {

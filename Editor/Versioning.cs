@@ -104,7 +104,7 @@ namespace Build.Editor
             AssetDatabase.Refresh();
         }
         
-        private static void MakeFolderValid(string path)
+        internal static void MakeFolderValid(string path)
         {
             if (AssetDatabase.IsValidFolder(path)) return;
             SplitPath(path, out var parent, out var folder);
