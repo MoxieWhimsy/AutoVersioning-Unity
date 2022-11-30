@@ -124,19 +124,23 @@ namespace Build.Editor
                     var properties = new VisualElement { style = { flexDirection = FlexDirection.Column } };
                     properties.AddToClassList("property-list");
                     rootElement.Add(properties);
-                    
+
+                    properties.Add(GenPropertyField(VersioningSettings.VersionControlSystemProperty,
+                        "Version Control System", settings));
                     properties.Add(GenPropertyField(VersioningSettings.MainBranchNameProperty,
                         nameof(VersioningSettings.MainBranchName), settings));
                     properties.Add(GenPropertyField(VersioningSettings.NumberOffsetProperty, 
                         "Build Number Offset", settings));
+                    properties.Add(GenPropertyField(VersioningSettings.CommitCountingStyleProperty,
+                        "Commit Counting Style", settings));
                     properties.Add(GenPropertyField(VersioningSettings.IncludeBranchCountProperty,
                         "Include Branch Count in version data", settings));
                     properties.Add(GenPropertyField(VersioningSettings.IncludeStatusChangesProperty,
                         "Include Number of Changes in version data", settings));
                     properties.Add(GenPropertyField(VersioningSettings.MinorTagsProperty, "Minor Tags", settings));
                     properties.Add(GenPropertyField(VersioningSettings.PatchTagsProperty, "Patch Tags", settings));
-                    properties.Add(GenPropertyField(VersioningSettings.CommitCountingStyleProperty,
-                        "Commit Counting Style", settings));
+
+                    
                     AddVersionDataPreview(rootElement);
                 }
             };
