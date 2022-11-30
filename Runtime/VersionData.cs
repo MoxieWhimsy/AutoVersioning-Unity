@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Build
 {
-	[CreateAssetMenu(menuName = "Create VersionData", fileName = "Version", order = 0)]
+	[CreateAssetMenu(menuName = "Versioning/Data", fileName = "Version", order = 0)]
 	public class VersionData : ScriptableObject
 	{
 		[SerializeField] private string version;
