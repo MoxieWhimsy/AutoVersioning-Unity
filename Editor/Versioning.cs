@@ -192,22 +192,7 @@ namespace Build.Editor
                 return false;
             }
 
-            var hashDash = description.LastIndexOf('-');
-            hash = description[(hashDash + 1)..];
-            description = description[..hashDash];
-            Debug.Log($"d:{description} h:{hash}");
-            var commitsDash = description.LastIndexOf('-');
-            var commits = int.Parse(description[(commitsDash + 1)..]);
-            description = description[..commitsDash];
-            Debug.Log($"d:{description} p:{commits} h:{hash}");
-            var tag = description;
-
-            var afterV = description.LastIndexOf('v') + 1;
-            var majorAndMinor = description[afterV..];
-            var minorDot = majorAndMinor.LastIndexOf('.');
-            var major = minorDot > 0 ? majorAndMinor[..minorDot] : majorAndMinor;
-
-            var lines = GetCommitLogLinesSinceTag(tag);
+            var majorAndMinor = GetGitMajorAndMinor(out hash, description, out var minorDot, out var major, out var lines);
 
             int minor, patch;
             if (minorDot > 0)
@@ -221,8 +206,30 @@ namespace Build.Editor
             version = $"{major}.{minor}.{patch}";
             return true;
         }
-        
-        
+
+        private static string GetGitMajorAndMinor(out string hash, string description, out int minorDot, out string major,
+            out string[] lines)
+        {
+            var hashDash = description.LastIndexOf('-');
+            hash = description[(hashDash + 1)..];
+            description = description[..hashDash];
+            Debug.Log($"d:{description} h:{hash}");
+            var commitsDash = description.LastIndexOf('-');
+            var commits = int.Parse(description[(commitsDash + 1)..]);
+            description = description[..commitsDash];
+            Debug.Log($"d:{description} p:{commits} h:{hash}");
+            var tag = description;
+
+            var afterV = description.LastIndexOf('v') + 1;
+            var majorAndMinor = description[afterV..];
+            minorDot = majorAndMinor.LastIndexOf('.');
+            major = minorDot > 0 ? majorAndMinor[..minorDot] : majorAndMinor;
+
+            lines = GetCommitLogLinesSinceTag(tag);
+            return majorAndMinor;
+        }
+
+
         /// <summary>
         /// Retrieves the most recent version tag on current branch
         /// </summary>
@@ -230,7 +237,11 @@ namespace Build.Editor
         {
             try
             {
-                description = Git.Run($@"describe --tags --long --match {VersionTagRegex}");
+                description = Settings.VersionControlSystem switch
+                {
+                    VersionControl.Git => Git.Run($@"describe --tags --long --match {VersionTagRegex}"),
+                    _ => string.Empty,
+                };
                 return true;
             }
             catch (GitException exception)
@@ -293,9 +304,13 @@ namespace Build.Editor
         private static string[] GetCommitLogLinesSinceTag(string tag)
             => GetCommitLogSinceTag(tag).Split('\n').Select(line => line.Trim()).ToArray();
 
-        private static string[] GetCommitLogLines()
-            => Git.CommitLog.Split('\n').Select(line => line.Trim()).ToArray();
-        
+        private static string[] GetCommitLogLines() => (Settings.VersionControlSystem switch
+        {
+            VersionControl.Git => Git.CommitLog,
+            VersionControl.PlasticScm => PlasticProcess.CommitLog,
+            _ => string.Empty,
+        }).Split('\n').Select(line => line.Trim()).ToArray();
+
         private static string GetCommitLogSinceTag(string tag) => Git.Run($@"log {tag}..head");
 
         public static string GetVersionString(bool includeHash = false, bool includeBuildNumber = false, bool commitStatus = false)
