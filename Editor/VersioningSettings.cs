@@ -14,6 +14,10 @@ namespace Build.Editor
         [SerializeField] private Versioning.VersionControl _versionControlSystem = Versioning.VersionControl.Git;
         public Versioning.VersionControl VersionControlSystem => _versionControlSystem;
         
+        [SerializeField] private Versioning.NumberType commitCountingStyle = Versioning.NumberType.BothMinorAndPatch;
+        public Versioning.NumberType CommitCountingStyle => commitCountingStyle;
+
+        
         [SerializeField] private string mainBranchName = "main";
         public string MainBranchName => mainBranchName;
 
@@ -36,16 +40,14 @@ namespace Build.Editor
         public Regex PatchRegex => new(string.Join('|', patchTags.Select(tag => @$"^{tag}")));
         public Regex UnionRegex => new(string.Join('|', minorTags.Union(patchTags).Select(tag => @$"^{tag}")));
 
-        [SerializeField] private Versioning.NumberType commitCountingStyle = Versioning.NumberType.BothMinorAndPatch;
-        public Versioning.NumberType CommitCountingStyle => commitCountingStyle;
-        
-        public static string MainBranchNameProperty => nameof(mainBranchName);
-        public static string NumberOffsetProperty => nameof(numberOffset);
+        public static string CommitCountingStyleProperty => nameof(commitCountingStyle);
         public static string IncludeBranchCountProperty => nameof(includeBranchCount);
         public static string IncludeStatusChangesProperty => nameof(includeStatusChanges);
+        public static string MainBranchNameProperty => nameof(mainBranchName);
         public static string MinorTagsProperty => nameof(minorTags);
+        public static string NumberOffsetProperty => nameof(numberOffset);
         public static string PatchTagsProperty => nameof(patchTags);
-        public static string CommitCountingStyleProperty => nameof(commitCountingStyle);
+        public static string VersionControlSystemProperty => nameof(_versionControlSystem);
         
         private const string DefaultSettingsFolder = "Assets/Editor/Settings";
         private static readonly string DefaultSettingsPath = $"{DefaultSettingsFolder}/{nameof(VersioningSettings)}.asset";
