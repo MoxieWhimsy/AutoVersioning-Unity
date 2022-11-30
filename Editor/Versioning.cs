@@ -66,6 +66,12 @@ namespace Build.Editor
             MainAndBranch,
         }
         
+        public enum VersionControl
+        {
+            Git,
+            PlasticScm,
+        }
+        
         /// <returns>true as long as output VersionData is usable, not null</returns>
         internal static bool GetOrCreateVersionData(out VersionData versionData)
         {

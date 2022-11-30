@@ -11,6 +11,9 @@ namespace Build.Editor
 {
     public class VersioningSettings : ScriptableObject
     {
+        [SerializeField] private Versioning.VersionControl _versionControlSystem = Versioning.VersionControl.Git;
+        public Versioning.VersionControl VersionControlSystem => _versionControlSystem;
+        
         [SerializeField] private string mainBranchName = "main";
         public string MainBranchName => mainBranchName;
 
