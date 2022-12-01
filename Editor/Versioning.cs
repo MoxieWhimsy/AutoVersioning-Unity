@@ -172,8 +172,7 @@ namespace Build.Editor
         {
             var lines = GetCommitLogLines();
 
-            number = CountCommits(lines);
-            number += Settings.NumberOffset;
+            number = Settings.GetBuildNumber(lines);
             return lines.Any();
         }
 
