@@ -11,8 +11,8 @@ namespace Build.Editor
         [SerializeField] private VersionControl _versionControlSystem = VersionControl.Git;
         public VersionControl VersionControlSystem => _versionControlSystem;
         
-        [SerializeField] private Versioning.NumberType commitCountingStyle = Versioning.NumberType.BothMinorAndPatch;
-        public Versioning.NumberType CommitCountingStyle => commitCountingStyle;
+        [SerializeField] private NumberType _commitCountingStyle = NumberType.BothMinorAndPatch;
+        public NumberType CommitCountingStyle => _commitCountingStyle;
 
         
         [SerializeField] private string mainBranchName = "main";
@@ -37,14 +37,20 @@ namespace Build.Editor
         public Regex PatchRegex => new(string.Join('|', patchTags.Select(tag => @$"^{tag}")));
         public Regex UnionRegex => new(string.Join('|', minorTags.Union(patchTags).Select(tag => @$"^{tag}")));
         
-        
+        public enum NumberType
+        {
+            BothMinorAndPatch,
+            MinorThenPatch,
+            MainAndBranch,
+        }
+
         public enum VersionControl
         {
             Git,
             PlasticScm,
         }
 
-        public static string CommitCountingStyleProperty => nameof(commitCountingStyle);
+        public static string CommitCountingStyleProperty => nameof(_commitCountingStyle);
         public static string IncludeBranchCountProperty => nameof(includeBranchCount);
         public static string IncludeStatusChangesProperty => nameof(includeStatusChanges);
         public static string MainBranchNameProperty => nameof(mainBranchName);

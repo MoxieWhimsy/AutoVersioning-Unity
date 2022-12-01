@@ -57,13 +57,6 @@ namespace Build.Editor
         /// True if we've checked out the main branch
         /// </summary>
         public static bool IsOnMain => Git.Branch == MainBranchName;
-        
-        public enum NumberType
-        {
-            BothMinorAndPatch,
-            MinorThenPatch,
-            MainAndBranch,
-        }
 
         /// <returns>true as long as output VersionData is usable, not null</returns>
         internal static bool GetOrCreateVersionData(out VersionData versionData)
@@ -126,17 +119,6 @@ namespace Build.Editor
             var index = path.IndexOf("Assets", System.StringComparison.Ordinal);
             return index < 0 ? string.Empty : path.Substring(index);
         }
-        
-        private static int CountCommits(string[] lines)
-        {
-            return Settings.CommitCountingStyle switch
-            {
-                NumberType.BothMinorAndPatch => CountBothMinorAndPatch(lines),
-                NumberType.MinorThenPatch => CountMinorThenPatch(lines),
-                NumberType.MainAndBranch => CountMainAndBranch(),
-                _ => 0
-            };
-        }
 
         private static int CountBothMinorAndPatch(IEnumerable<string> lines) 
             => lines.Count(line => Settings.UnionRegex.IsMatch(line));
@@ -175,29 +157,8 @@ namespace Build.Editor
         /// represents the nth commit after the tagged commit.
         /// Note: The initial 'v' and the commit hash code are removed.
         /// </summary>
-        public static bool GetBuildVersion(out string version, out string hash)
-        {
-            if (!Settings.GetDescription(out var description))
-            {
-                version = "unknown";
-                hash = string.Empty;
-                return false;
-            }
-
-            var majorAndMinor = GetGitMajorAndMinor(out hash, description, out var minorDot, out var major, out var lines);
-
-            int minor, patch;
-            if (minorDot > 0)
-            {
-                minor = int.Parse(majorAndMinor[(minorDot + 1)..]);
-                patch = CountBothMinorAndPatch(lines);
-            }
-            else
-                Settings.GetMinorAndThenPatch(lines, out minor, out patch);
-
-            version = $"{major}.{minor}.{patch}";
-            return true;
-        }
+        public static bool GetBuildVersion(out string version, out string hash) 
+            => Settings.GetBuildVersion(out version, out hash);
 
         private static string GetGitMajorAndMinor(out string hash, string description, out int minorDot, out string major,
             out string[] lines)

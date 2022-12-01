@@ -12,6 +12,15 @@ namespace Build.Editor
 
         private int CountBothMinorAndPatch(IEnumerable<string> lines)
             => lines.Count(line => UnionRegex.IsMatch(line));
+        
+        
+        private int CountCommits(string[] lines) => _commitCountingStyle switch
+        {
+            NumberType.BothMinorAndPatch => CountBothMinorAndPatch(lines),
+            NumberType.MinorThenPatch => CountMinorThenPatch(lines),
+            NumberType.MainAndBranch => CountMainAndBranch(),
+            _ => 0
+        };
 
         /// <summary>
         /// Returns the number of commits on main up to the commit where this branch connects to main.
@@ -28,6 +37,9 @@ namespace Build.Editor
         private int CountCommitsSinceMain()
             => int.Parse(Git.Run($@"rev-list --count {MainBranchName}..HEAD"));
 
+        private string[] CountCommitLogLinesSinceTag(string tag)
+            => GetCommitLogSinceTag(tag).Split('\n').Select(line => line.Trim()).ToArray();
+        
         private int CountMinorThenPatch(string[] lines)
         {
             var patch = GetMinorAndThenPatch(lines, out var minor);
@@ -43,14 +55,53 @@ namespace Build.Editor
 
         internal int GetBuildNumber(string[] lines)
         {
-            return commitCountingStyle switch
+            return _commitCountingStyle switch
             {
-                Versioning.NumberType.BothMinorAndPatch => CountBothMinorAndPatch(lines),
-                Versioning.NumberType.MinorThenPatch => CountMinorThenPatch(lines),
-                Versioning.NumberType.MainAndBranch => CountMainAndBranch(),
+                NumberType.BothMinorAndPatch => CountBothMinorAndPatch(lines),
+                NumberType.MinorThenPatch => CountMinorThenPatch(lines),
+                NumberType.MainAndBranch => CountMainAndBranch(),
                 _ => 0
             } + numberOffset;
         }
+        
+        /// <summary>
+        /// Retrieves the build version from the chosen version control system based on
+        /// a combination of commit history and the most recent matching tag
+        /// This returns the version as: {major.minor.build} where 'build'
+        /// represents the nth commit after a minor or tagged commit.
+        /// Note: The initial 'v' and the commit hash code are removed.
+        /// </summary>
+        public bool GetBuildVersion(out string version, out string hash)
+        {
+            if (!GetDescription(out var description))
+            {
+                version = "unknown";
+                hash = string.Empty;
+                return false;
+            }
+
+            var majorAndMinor = GetGitMajorAndMinor(description, out hash, out var minorDot, out var major, out var tag);
+            major = minorDot > 0 ? majorAndMinor[..minorDot] : majorAndMinor;
+            var minor = minorDot > 0 ? int.Parse(majorAndMinor[(minorDot + 1)..]) : 0;
+
+            var lines = CountCommitLogLinesSinceTag(tag);
+
+
+            var minorFromLines = 0;
+            var patch = _commitCountingStyle switch
+            {
+                NumberType.BothMinorAndPatch => CountBothMinorAndPatch(lines),
+                NumberType.MinorThenPatch => GetMinorAndThenPatch(lines, out minorFromLines),
+                NumberType.MainAndBranch => CountCommits(lines),
+                _ => 0
+            };
+
+            minor += minorFromLines;
+
+            version = $"{major}.{minor}.{patch}";
+            return true;
+        }
+
         
         internal string[] GetCommitLogLines() => (VersionControlSystem switch
         {
@@ -58,8 +109,14 @@ namespace Build.Editor
             VersionControl.PlasticScm => PlasticProcess.CommitLog,
             _ => string.Empty,
         }).Split('\n').Select(line => line.Trim()).ToArray();
-        
-        
+
+        private string GetCommitLogSinceTag(string tag) => _versionControlSystem switch
+        {
+            VersionControl.Git => Git.Run($@"log {tag}..head"),
+            _ => string.Empty,
+        };
+
+
         /// <summary>
         /// Retrieves the most recent version tag on current branch
         /// </summary>
@@ -82,6 +139,28 @@ namespace Build.Editor
             }
         }
 
+        private string GetGitMajorAndMinor(string description, out string hash, out int minorDot, out string major,
+            out string tag)
+        {
+            var hashDash = description.LastIndexOf('-');
+            hash = description[(hashDash + 1)..];
+            description = description[..hashDash];
+            Debug.Log($"d:{description} h:{hash}");
+            var commitsDash = description.LastIndexOf('-');
+            var commits = int.Parse(description[(commitsDash + 1)..]);
+            description = description[..commitsDash];
+            Debug.Log($"d:{description} p:{commits} h:{hash}");
+            tag = description;
+
+            var afterV = description.LastIndexOf('v') + 1;
+            var majorAndMinor = description[afterV..];
+            minorDot = majorAndMinor.LastIndexOf('.');
+            major = minorDot > 0 ? majorAndMinor[..minorDot] : majorAndMinor;
+            return majorAndMinor;
+        }
+
+
+        
         internal int GetMinorAndThenPatch(string[] lines, out int minor)
         {
             minor = lines.Count(line => MinorRegex.IsMatch(line));
