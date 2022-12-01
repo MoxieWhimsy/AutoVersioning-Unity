@@ -53,7 +53,9 @@ namespace Build.Editor
                     properties.Add(GenPropertyField(VersioningSettings.NumberOffsetProperty, 
                         "Build Number Offset", settings));
                     properties.Add(GenPropertyField(VersioningSettings.CommitCountingStyleProperty,
-                        "Commit Counting Style", settings));
+                        "Build Number Counts", settings));
+                    properties.Add(GenPropertyField(VersioningSettings.BundleVersionStyleProperty,
+                        "Bundle Version Counts", settings));
                     properties.Add(GenPropertyField(VersioningSettings.IncludeBranchCountProperty,
                         "Include Branch Count in version data", settings));
                     properties.Add(GenPropertyField(VersioningSettings.IncludeStatusChangesProperty,

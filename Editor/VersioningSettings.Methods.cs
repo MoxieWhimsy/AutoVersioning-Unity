@@ -76,7 +76,7 @@ namespace Build.Editor
 
 
             var minorFromLines = 0;
-            var patch = _commitCountingStyle switch
+            var patch = _bundleVersionStyle switch
             {
                 NumberType.BothMinorAndPatch => CountBothMinorAndPatch(lines),
                 NumberType.MinorThenPatch => GetMinorAndThenPatch(lines, out minorFromLines),

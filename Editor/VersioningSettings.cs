@@ -12,6 +12,7 @@ namespace Build.Editor
         public VersionControl VersionControlSystem => _versionControlSystem;
         
         [SerializeField] private NumberType _commitCountingStyle = NumberType.BothMinorAndPatch;
+        [SerializeField] private NumberType _bundleVersionStyle = NumberType.MinorThenPatch;
 
 
         [SerializeField] private string mainBranchName = "main";
@@ -48,6 +49,7 @@ namespace Build.Editor
             PlasticScm,
         }
 
+        public static string BundleVersionStyleProperty => nameof(_bundleVersionStyle);
         public static string CommitCountingStyleProperty => nameof(_commitCountingStyle);
         public static string IncludeBranchCountProperty => nameof(includeBranchCount);
         public static string IncludeStatusChangesProperty => nameof(includeStatusChanges);
