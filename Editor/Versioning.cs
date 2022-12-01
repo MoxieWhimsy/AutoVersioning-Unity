@@ -23,7 +23,7 @@ namespace Build.Editor
         }
         
         public static string ShortBundle
-            => GetBuildVersion(out var version, out _) ? version : "unknown";
+            => Settings.GetBuildVersion(out var version, out _) ? version : "unknown";
         
         public static string BranchCount => $"{CommitsOnMainToBranch}.{CommitsSinceMain}";
 
@@ -160,7 +160,7 @@ namespace Build.Editor
         public static VersionData UpdateVersionData()
         {
             var data = VersionData.GetFromResources();
-            if (GetBuildVersion(out var memo, out var hash))
+            if (Settings.GetBuildVersion(out var memo, out var hash))
             {
                 data.Version = memo;
                 data.Hash = hash;
@@ -192,7 +192,7 @@ namespace Build.Editor
 
         public static string GetVersionString(bool includeHash = false, bool includeBuildNumber = false, bool commitStatus = false)
         {
-            GetBuildVersion(out var version, out var hash);
+            Settings.GetBuildVersion(out var version, out var hash);
             if (includeHash) version += $" {hash}";
             if (includeBuildNumber && GetBuildNumber(out var number)) version += $" ({number})";
             if (commitStatus && !includeBuildNumber) version += $"+{CommitsSinceMain}";

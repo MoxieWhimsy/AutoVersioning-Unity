@@ -73,13 +73,9 @@ namespace Build.Editor
         /// </summary>
         public bool GetBuildVersion(out string version, out string hash)
         {
-            var description = GetDescription();
-            
-            var majorAndMinor = GetGitMajorAndMinor(description, out hash, out var minorDot, out var tag);
+            var majorAndMinor = GetGitMajorAndMinor(out hash, out var minorDot, out var lines);
             var major = int.Parse(minorDot > 0 ? majorAndMinor[..minorDot] : majorAndMinor);
             var minor = minorDot > 0 ? int.Parse(majorAndMinor[(minorDot + 1)..]) : 0;
-
-            var lines = CountCommitLogLinesSinceTag(tag);
 
 
             var minorFromLines = 0;
@@ -87,7 +83,7 @@ namespace Build.Editor
             {
                 NumberType.BothMinorAndPatch => CountBothMinorAndPatch(lines),
                 NumberType.MinorThenPatch => GetMinorAndThenPatch(lines, out minorFromLines),
-                NumberType.MainAndBranch => CountCommits(lines),
+                NumberType.MainAndBranch => CountMainAndBranch(),
                 _ => 0
             };
 
@@ -105,25 +101,19 @@ namespace Build.Editor
             _ => string.Empty,
         }).Split('\n').Select(line => line.Trim()).ToArray();
 
-        private string GetCommitLogSinceTag(string tag) => _versionControlSystem switch
-        {
-            VersionControl.Git => Git.Run($@"log {tag}..head"),
-            _ => string.Empty,
-        };
+        
+        private static string[] CountCommitLogLinesSinceGitTag(string tag)
+            => Git.Run($@"log {tag}..head").Split('\n').Select(line => line.Trim()).ToArray();
 
 
         /// <summary>
         /// Retrieves the most recent version tag on current branch
         /// </summary>
-        public string GetDescription()
+        private static string GetGitDescription()
         {
             try
             {
-                return VersionControlSystem switch
-                {
-                    VersionControl.Git => Git.Run($@"describe --tags --long --match {VersionTagRegex}"),
-                    _ => string.Empty,
-                };
+                return Git.Run($@"describe --tags --long --match {VersionTagRegex}");
             }
             catch (GitException exception)
             {
@@ -132,8 +122,16 @@ namespace Build.Editor
             }
         }
 
-        private static string GetGitMajorAndMinor(string description, out string hash, out int minorDot, out string tag)
+        private string GetMajorAndMinor(out string hash, out int minorDot, out string[] lines)
+            => _versionControlSystem switch
+            {
+                VersionControl.Git => GetGitMajorAndMinor(out hash, out minorDot, out lines),
+                VersionControl.PlasticScm => GetPlasticMajorAndMinor(out hash, out minorDot, out lines),
+            };
+        
+        private string GetGitMajorAndMinor(out string hash, out int minorDot, out string[] lines)
         {
+            var description = GetGitDescription();
             var hashDash = description.LastIndexOf('-');
             hash = description[(hashDash + 1)..];
             description = description[..hashDash];
