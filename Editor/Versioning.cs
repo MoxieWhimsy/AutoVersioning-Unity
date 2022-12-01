@@ -10,7 +10,6 @@ namespace Build.Editor
     public static class Versioning
     {
         private static string MainBranchName => VersioningSettings.GetOrCreate().MainBranchName;
-        private const string VersionTagRegex = @"""*v[0-9]*""";
 
         private static VersioningSettings s_cache;
 
@@ -65,13 +64,7 @@ namespace Build.Editor
             MinorThenPatch,
             MainAndBranch,
         }
-        
-        public enum VersionControl
-        {
-            Git,
-            PlasticScm,
-        }
-        
+
         /// <returns>true as long as output VersionData is usable, not null</returns>
         internal static bool GetOrCreateVersionData(out VersionData versionData)
         {
@@ -170,7 +163,7 @@ namespace Build.Editor
         /// </summary>
         public static bool GetBuildNumber(out int number)
         {
-            var lines = GetCommitLogLines();
+            var lines = Settings.GetCommitLogLines();
 
             number = Settings.GetBuildNumber(lines);
             return lines.Any();
@@ -184,7 +177,7 @@ namespace Build.Editor
         /// </summary>
         public static bool GetBuildVersion(out string version, out string hash)
         {
-            if (!GetDescription(out var description))
+            if (!Settings.GetDescription(out var description))
             {
                 version = "unknown";
                 hash = string.Empty;
@@ -226,29 +219,6 @@ namespace Build.Editor
 
             lines = GetCommitLogLinesSinceTag(tag);
             return majorAndMinor;
-        }
-
-
-        /// <summary>
-        /// Retrieves the most recent version tag on current branch
-        /// </summary>
-        public static bool GetDescription(out string description)
-        {
-            try
-            {
-                description = Settings.VersionControlSystem switch
-                {
-                    VersionControl.Git => Git.Run($@"describe --tags --long --match {VersionTagRegex}"),
-                    _ => string.Empty,
-                };
-                return true;
-            }
-            catch (GitException exception)
-            {
-                Debug.LogError($"{nameof(Versioning)}: exit code = {exception.ExitCode}\n{exception.Message}");
-                description = string.Empty;
-                return false;
-            }
         }
 
 
@@ -302,13 +272,6 @@ namespace Build.Editor
 
         private static string[] GetCommitLogLinesSinceTag(string tag)
             => GetCommitLogSinceTag(tag).Split('\n').Select(line => line.Trim()).ToArray();
-
-        private static string[] GetCommitLogLines() => (Settings.VersionControlSystem switch
-        {
-            VersionControl.Git => Git.CommitLog,
-            VersionControl.PlasticScm => PlasticProcess.CommitLog,
-            _ => string.Empty,
-        }).Split('\n').Select(line => line.Trim()).ToArray();
 
         private static string GetCommitLogSinceTag(string tag) => Git.Run($@"log {tag}..head");
 

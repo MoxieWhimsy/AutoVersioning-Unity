@@ -2,11 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using RedBlueGames;
+using UnityEngine;
 
 namespace Build.Editor
 {
     public partial class VersioningSettings
     {
+        private const string VersionTagRegex = @"""*v[0-9]*""";
+
         private int CountBothMinorAndPatch(IEnumerable<string> lines)
             => lines.Count(line => UnionRegex.IsMatch(line));
 
@@ -47,6 +50,36 @@ namespace Build.Editor
                 Versioning.NumberType.MainAndBranch => CountMainAndBranch(),
                 _ => 0
             } + numberOffset;
+        }
+        
+        internal string[] GetCommitLogLines() => (VersionControlSystem switch
+        {
+            VersionControl.Git => Git.CommitLog,
+            VersionControl.PlasticScm => PlasticProcess.CommitLog,
+            _ => string.Empty,
+        }).Split('\n').Select(line => line.Trim()).ToArray();
+        
+        
+        /// <summary>
+        /// Retrieves the most recent version tag on current branch
+        /// </summary>
+        public bool GetDescription(out string description)
+        {
+            try
+            {
+                description = VersionControlSystem switch
+                {
+                    VersionControl.Git => Git.Run($@"describe --tags --long --match {VersionTagRegex}"),
+                    _ => string.Empty,
+                };
+                return true;
+            }
+            catch (GitException exception)
+            {
+                Debug.LogError($"{nameof(Versioning)}: exit code = {exception.ExitCode}\n{exception.Message}");
+                description = string.Empty;
+                return false;
+            }
         }
 
         internal int GetMinorAndThenPatch(string[] lines, out int minor)

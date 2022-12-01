@@ -8,8 +8,8 @@ namespace Build.Editor
 {
     public partial class VersioningSettings : ScriptableObject
     {
-        [SerializeField] private Versioning.VersionControl _versionControlSystem = Versioning.VersionControl.Git;
-        public Versioning.VersionControl VersionControlSystem => _versionControlSystem;
+        [SerializeField] private VersionControl _versionControlSystem = VersionControl.Git;
+        public VersionControl VersionControlSystem => _versionControlSystem;
         
         [SerializeField] private Versioning.NumberType commitCountingStyle = Versioning.NumberType.BothMinorAndPatch;
         public Versioning.NumberType CommitCountingStyle => commitCountingStyle;
@@ -36,6 +36,13 @@ namespace Build.Editor
         public Regex MinorRegex => new(string.Join('|', minorTags.Select(tag => @$"^{tag}")));
         public Regex PatchRegex => new(string.Join('|', patchTags.Select(tag => @$"^{tag}")));
         public Regex UnionRegex => new(string.Join('|', minorTags.Union(patchTags).Select(tag => @$"^{tag}")));
+        
+        
+        public enum VersionControl
+        {
+            Git,
+            PlasticScm,
+        }
 
         public static string CommitCountingStyleProperty => nameof(commitCountingStyle);
         public static string IncludeBranchCountProperty => nameof(includeBranchCount);
