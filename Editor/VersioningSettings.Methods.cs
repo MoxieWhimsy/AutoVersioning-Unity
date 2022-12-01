@@ -73,15 +73,10 @@ namespace Build.Editor
         /// </summary>
         public bool GetBuildVersion(out string version, out string hash)
         {
-            if (!GetDescription(out var description))
-            {
-                version = "unknown";
-                hash = string.Empty;
-                return false;
-            }
-
-            var majorAndMinor = GetGitMajorAndMinor(description, out hash, out var minorDot, out var major, out var tag);
-            major = minorDot > 0 ? majorAndMinor[..minorDot] : majorAndMinor;
+            var description = GetDescription();
+            
+            var majorAndMinor = GetGitMajorAndMinor(description, out hash, out var minorDot, out var tag);
+            var major = int.Parse(minorDot > 0 ? majorAndMinor[..minorDot] : majorAndMinor);
             var minor = minorDot > 0 ? int.Parse(majorAndMinor[(minorDot + 1)..]) : 0;
 
             var lines = CountCommitLogLinesSinceTag(tag);
@@ -120,27 +115,24 @@ namespace Build.Editor
         /// <summary>
         /// Retrieves the most recent version tag on current branch
         /// </summary>
-        public bool GetDescription(out string description)
+        public string GetDescription()
         {
             try
             {
-                description = VersionControlSystem switch
+                return VersionControlSystem switch
                 {
                     VersionControl.Git => Git.Run($@"describe --tags --long --match {VersionTagRegex}"),
                     _ => string.Empty,
                 };
-                return true;
             }
             catch (GitException exception)
             {
                 Debug.LogError($"{nameof(Versioning)}: exit code = {exception.ExitCode}\n{exception.Message}");
-                description = string.Empty;
-                return false;
+                return string.Empty;
             }
         }
 
-        private string GetGitMajorAndMinor(string description, out string hash, out int minorDot, out string major,
-            out string tag)
+        private static string GetGitMajorAndMinor(string description, out string hash, out int minorDot, out string tag)
         {
             var hashDash = description.LastIndexOf('-');
             hash = description[(hashDash + 1)..];
@@ -155,7 +147,6 @@ namespace Build.Editor
             var afterV = description.LastIndexOf('v') + 1;
             var majorAndMinor = description[afterV..];
             minorDot = majorAndMinor.LastIndexOf('.');
-            major = minorDot > 0 ? majorAndMinor[..minorDot] : majorAndMinor;
             return majorAndMinor;
         }
 
