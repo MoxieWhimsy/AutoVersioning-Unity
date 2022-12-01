@@ -31,13 +31,6 @@ namespace Build.Editor
         public static string CommitBranchingFromMain
             => Git.Run($@"merge-base {MainBranchName} HEAD");
 
-        /// <summary>
-        /// Returns the number of commits on the main branch
-        /// </summary>
-        public static int CommitsOnMain 
-            => int.TryParse(Git.Run($@"rev-list --count {MainBranchName}"), out var commitsOnMain)
-                ? commitsOnMain : 0;
-
 
         /// <summary>
         /// Returns the number of commits on main up to the commit where this branch connects to main.
@@ -131,15 +124,6 @@ namespace Build.Editor
             number = Settings.GetBuildNumber(lines);
             return lines.Any();
         }
-
-        /// <summary>
-        /// Retrieves the build version from git based on the most recent matching tag and
-        /// commit history. This returns the version as: {major.minor.build} where 'build'
-        /// represents the nth commit after the tagged commit.
-        /// Note: The initial 'v' and the commit hash code are removed.
-        /// </summary>
-        public static bool GetBuildVersion(out string version, out string hash) 
-            => Settings.GetBuildVersion(out version, out hash);
 
 
         [MenuItem("Build/Version Data/Clear Most (not debug)")]

@@ -12,15 +12,6 @@ namespace Build.Editor
 
         private int CountBothMinorAndPatch(IEnumerable<string> lines)
             => lines.Count(line => UnionRegex.IsMatch(line));
-        
-        
-        private int CountCommits(string[] lines) => _commitCountingStyle switch
-        {
-            NumberType.BothMinorAndPatch => CountBothMinorAndPatch(lines),
-            NumberType.MinorThenPatch => CountMinorThenPatch(lines),
-            NumberType.MainAndBranch => CountMainAndBranch(),
-            _ => 0
-        };
 
         /// <summary>
         /// Returns the number of commits on main up to the commit where this branch connects to main.
@@ -37,9 +28,6 @@ namespace Build.Editor
         private int CountCommitsSinceMain()
             => int.Parse(Git.Run($@"rev-list --count {MainBranchName}..HEAD"));
 
-        private string[] CountCommitLogLinesSinceTag(string tag)
-            => GetCommitLogSinceTag(tag).Split('\n').Select(line => line.Trim()).ToArray();
-        
         private int CountMinorThenPatch(string[] lines)
         {
             var patch = GetMinorAndThenPatch(lines, out var minor);
