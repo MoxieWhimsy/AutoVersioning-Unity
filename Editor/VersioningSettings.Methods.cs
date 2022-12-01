@@ -124,9 +124,10 @@ namespace Build.Editor
             {
                 VersionControl.Git => GetMajorAndMinorFromGit(out hash, out minorDot, out lines),
                 VersionControl.PlasticScm => GetMajorAndMinorFromPlastic(out hash, out minorDot, out lines),
+                _ => GetMajorAndMinorUnhandled(_versionControlSystem, out hash, out minorDot, out lines),
             };
         
-        private string GetMajorAndMinorFromGit(out string hash, out int minorDot, out string[] lines)
+        private static string GetMajorAndMinorFromGit(out string hash, out int minorDot, out string[] lines)
         {
             var description = GetGitDescription();
             var hashDash = description.LastIndexOf('-');
@@ -169,6 +170,17 @@ namespace Build.Editor
             minorDot = majorAndMinor.LastIndexOf('.');
             return majorAndMinor;
         }
+
+        private static string GetMajorAndMinorUnhandled(VersionControl versionControl, out string hash, out int zero,
+            out string[] lines)
+        {
+            lines = new string[] { };
+            zero = 0;
+            hash = $"unhandled version control system: {versionControl}";
+            Debug.LogError(hash);
+            return hash;
+        }
+
 
         internal int GetMinorAndThenPatch(string[] lines, out int minor)
         {
