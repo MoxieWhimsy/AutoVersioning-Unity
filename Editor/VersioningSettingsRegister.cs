@@ -38,7 +38,7 @@ namespace Build.Editor
                     
                     var styleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>(styleSheetPath);
                     if (styleSheet) rootElement.styleSheets.Add(styleSheet);
-                    var title = new Label { text = "Git" };
+                    var title = new Label { text = "Versioning" };
                     title.AddToClassList("title");
                     rootElement.Add(title);
                     
@@ -56,12 +56,15 @@ namespace Build.Editor
                         "Build Number Counts", settings));
                     properties.Add(GenPropertyField(VersioningSettings.BundleVersionStyleProperty,
                         "Bundle Version Counts", settings));
-                    properties.Add(GenPropertyField(VersioningSettings.IncludeBranchCountProperty,
-                        "Include Branch Count in version data", settings));
-                    properties.Add(GenPropertyField(VersioningSettings.IncludeStatusChangesProperty,
-                        "Include Number of Changes in version data", settings));
                     properties.Add(GenPropertyField(VersioningSettings.MinorTagsProperty, "Minor Tags", settings));
                     properties.Add(GenPropertyField(VersioningSettings.PatchTagsProperty, "Patch Tags", settings));
+                    var versionDataTitle = new Label("Version Data");
+                    versionDataTitle.AddToClassList("title");
+                    properties.Add(versionDataTitle);
+                    properties.Add(GenPropertyField(VersioningSettings.IncludeBranchCountProperty,
+                        "Include Branch Count", settings));
+                    properties.Add(GenPropertyField(VersioningSettings.IncludeStatusChangesProperty,
+                        "Include Number of Changes", settings));
 
                     
                     AddVersionDataPreview(rootElement);
