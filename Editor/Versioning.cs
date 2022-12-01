@@ -1,5 +1,4 @@
 #if UNITY_EDITOR
-using System.Collections.Generic;
 using System.Linq;
 using RedBlueGames;
 using UnityEditor;
@@ -120,25 +119,7 @@ namespace Build.Editor
             return index < 0 ? string.Empty : path.Substring(index);
         }
 
-        private static int CountBothMinorAndPatch(IEnumerable<string> lines) 
-            => lines.Count(line => Settings.UnionRegex.IsMatch(line));
 
-        private static int CountMinorThenPatch(string[] lines)
-        {
-            var minor = lines.Count(line => Settings.MinorRegex.IsMatch(line));
-            lines = lines.TakeWhile(line => !Settings.MinorRegex.IsMatch(line)).ToArray();
-            var patch = lines.Count(line => Settings.PatchRegex.IsMatch(line));
-            return Settings.MaxPatchesPerMinor * minor + patch;
-        }
-
-        private static int CountMainAndBranch()
-        {
-            var mainToBranchPt = CommitsOnMainToBranch;
-            var headFromBranchPt = CommitsSinceMain;
-            return Settings.BranchCommitLimit * mainToBranchPt + headFromBranchPt;
-        }
-
-        
         /// <summary>
         /// Generates a build number suitable for platforms that require an incrementing integer build number.
         /// Such as Android.
@@ -159,28 +140,6 @@ namespace Build.Editor
         /// </summary>
         public static bool GetBuildVersion(out string version, out string hash) 
             => Settings.GetBuildVersion(out version, out hash);
-
-        private static string GetGitMajorAndMinor(out string hash, string description, out int minorDot, out string major,
-            out string[] lines)
-        {
-            var hashDash = description.LastIndexOf('-');
-            hash = description[(hashDash + 1)..];
-            description = description[..hashDash];
-            Debug.Log($"d:{description} h:{hash}");
-            var commitsDash = description.LastIndexOf('-');
-            var commits = int.Parse(description[(commitsDash + 1)..]);
-            description = description[..commitsDash];
-            Debug.Log($"d:{description} p:{commits} h:{hash}");
-            var tag = description;
-
-            var afterV = description.LastIndexOf('v') + 1;
-            var majorAndMinor = description[afterV..];
-            minorDot = majorAndMinor.LastIndexOf('.');
-            major = minorDot > 0 ? majorAndMinor[..minorDot] : majorAndMinor;
-
-            lines = GetCommitLogLinesSinceTag(tag);
-            return majorAndMinor;
-        }
 
 
         [MenuItem("Build/Version Data/Clear Most (not debug)")]
@@ -230,11 +189,6 @@ namespace Build.Editor
             var status = Git.Status;
             return status.Trim().Length > 0 ? status.Split('\n').Length : 0;
         }
-
-        private static string[] GetCommitLogLinesSinceTag(string tag)
-            => GetCommitLogSinceTag(tag).Split('\n').Select(line => line.Trim()).ToArray();
-
-        private static string GetCommitLogSinceTag(string tag) => Git.Run($@"log {tag}..head");
 
         public static string GetVersionString(bool includeHash = false, bool includeBuildNumber = false, bool commitStatus = false)
         {

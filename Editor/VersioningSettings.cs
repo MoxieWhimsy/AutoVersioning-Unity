@@ -12,14 +12,12 @@ namespace Build.Editor
         public VersionControl VersionControlSystem => _versionControlSystem;
         
         [SerializeField] private NumberType _commitCountingStyle = NumberType.BothMinorAndPatch;
-        public NumberType CommitCountingStyle => _commitCountingStyle;
 
-        
+
         [SerializeField] private string mainBranchName = "main";
         public string MainBranchName => mainBranchName;
 
         [SerializeField] private int numberOffset;
-        public int NumberOffset => numberOffset;
         [SerializeField] private bool includeBranchCount;
         [SerializeField] private bool includeStatusChanges;
         public bool IncludeBranchCount => includeBranchCount;
