@@ -1,6 +1,7 @@
 #if UNITY_EDITOR
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using RedBlueGames;
 using UnityEngine;
 
@@ -9,6 +10,7 @@ namespace Build.Editor
     public partial class VersioningSettings
     {
         private const string VersionTagRegex = @"""*v[0-9]*""";
+        public static Regex PlasticVersionTagRegex => new(@"^version-tag:");
 
         private int CountBothMinorAndPatch(IEnumerable<string> lines)
             => lines.Count(line => UnionRegex.IsMatch(line));
@@ -34,24 +36,31 @@ namespace Build.Editor
             return MaxPatchesPerMinor * minor + patch;
         }
 
-        private int CountMainAndBranch()
+        private int CountMainAndBranch(string[] lines)
         {
-            var mainToBranchPt = CountCommitsOnMainToBranch();
-            var headFromBranchPt = CountCommitsSinceMain();
-            return BranchCommitLimit * mainToBranchPt + headFromBranchPt;
+            switch (_versionControlSystem)
+            {
+                case VersionControl.Git:
+                    return BranchCommitLimit * CountCommitsOnMainToBranch() + CountCommitsSinceMain();
+                case VersionControl.PlasticScm:
+                {
+                    var branchLines = lines.Where(line => line.StartsWith("Branch:")).ToArray();
+                    var numberOnMain = branchLines.Count(line => line.EndsWith(mainBranchName));
+                    return BranchCommitLimit * numberOnMain + branchLines.Length - numberOnMain;
+                }
+                default:
+                    return 0;
+            }
         }
 
-        internal int GetBuildNumber(string[] lines)
+        internal int GetBuildNumber(string[] lines) => _commitCountingStyle switch
         {
-            return _commitCountingStyle switch
-            {
-                NumberType.BothMinorAndPatch => CountBothMinorAndPatch(lines),
-                NumberType.MinorThenPatch => CountMinorThenPatch(lines),
-                NumberType.MainAndBranch => CountMainAndBranch(),
-                _ => 0
-            } + numberOffset;
-        }
-        
+            NumberType.BothMinorAndPatch => CountBothMinorAndPatch(lines),
+            NumberType.MinorThenPatch => CountMinorThenPatch(lines),
+            NumberType.MainAndBranch => CountMainAndBranch(lines),
+            _ => 0
+        } + numberOffset;
+
         /// <summary>
         /// Retrieves the build version from the chosen version control system based on
         /// a combination of commit history and the most recent matching tag
@@ -61,7 +70,7 @@ namespace Build.Editor
         /// </summary>
         public bool GetBuildVersion(out string version, out string hash)
         {
-            var majorAndMinor = GetGitMajorAndMinor(out hash, out var minorDot, out var lines);
+            var majorAndMinor = GetMajorAndMinor(out hash, out var minorDot, out var lines);
             var major = int.Parse(minorDot > 0 ? majorAndMinor[..minorDot] : majorAndMinor);
             var minor = minorDot > 0 ? int.Parse(majorAndMinor[(minorDot + 1)..]) : 0;
 
@@ -71,7 +80,7 @@ namespace Build.Editor
             {
                 NumberType.BothMinorAndPatch => CountBothMinorAndPatch(lines),
                 NumberType.MinorThenPatch => GetMinorAndThenPatch(lines, out minorFromLines),
-                NumberType.MainAndBranch => CountMainAndBranch(),
+                NumberType.MainAndBranch => CountMainAndBranch(lines),
                 _ => 0
             };
 
@@ -113,11 +122,11 @@ namespace Build.Editor
         private string GetMajorAndMinor(out string hash, out int minorDot, out string[] lines)
             => _versionControlSystem switch
             {
-                VersionControl.Git => GetGitMajorAndMinor(out hash, out minorDot, out lines),
-                VersionControl.PlasticScm => GetPlasticMajorAndMinor(out hash, out minorDot, out lines),
+                VersionControl.Git => GetMajorAndMinorFromGit(out hash, out minorDot, out lines),
+                VersionControl.PlasticScm => GetMajorAndMinorFromPlastic(out hash, out minorDot, out lines),
             };
         
-        private string GetGitMajorAndMinor(out string hash, out int minorDot, out string[] lines)
+        private string GetMajorAndMinorFromGit(out string hash, out int minorDot, out string[] lines)
         {
             var description = GetGitDescription();
             var hashDash = description.LastIndexOf('-');
@@ -128,16 +137,39 @@ namespace Build.Editor
             var commits = int.Parse(description[(commitsDash + 1)..]);
             description = description[..commitsDash];
             Debug.Log($"d:{description} p:{commits} h:{hash}");
-            tag = description;
+            var tag = description;
 
             var afterV = description.LastIndexOf('v') + 1;
             var majorAndMinor = description[afterV..];
             minorDot = majorAndMinor.LastIndexOf('.');
+            lines = CountCommitLogLinesSinceGitTag(tag);
             return majorAndMinor;
         }
 
+        private static string GetMajorAndMinorFromPlastic(out string hash, out int minorDot, out string[] lines)
+        {
+            lines = PlasticProcess.CommitLog.Split('\n');
+            var statusHeader = new PlasticProcess(@"status --header", Application.dataPath).Run().Output;
+            var hashColon = statusHeader.LastIndexOf("cs:", System.StringComparison.Ordinal) + 2;
+            var headDash = statusHeader.LastIndexOf('-');
+            hash = statusHeader[hashColon..(headDash - 1)];
 
-        
+            var versionTags = lines.Where(line => PlasticVersionTagRegex.IsMatch(line)).ToArray();
+            if (versionTags.Length <= 0)
+            {
+                minorDot = 0;
+                return "0";
+            }
+
+            var description = versionTags.First();
+            lines = lines.TakeWhile(line => !PlasticVersionTagRegex.IsMatch(line)).ToArray();
+            
+            var afterColon = description.LastIndexOf(':') + 1;
+            var majorAndMinor = description[afterColon..];
+            minorDot = majorAndMinor.LastIndexOf('.');
+            return majorAndMinor;
+        }
+
         internal int GetMinorAndThenPatch(string[] lines, out int minor)
         {
             minor = lines.Count(line => MinorRegex.IsMatch(line));
