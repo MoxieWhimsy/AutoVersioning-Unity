@@ -97,7 +97,7 @@ namespace Build.Editor
         }).Split('\n').Select(line => line.Trim()).ToArray();
 
         
-        private static string[] CountCommitLogLinesSinceGitTag(string tag)
+        private static string[] GetCommitLogLinesSinceGitTag(string tag)
             => Git.Run($@"log {tag}..head").Split('\n').Select(line => line.Trim()).ToArray();
 
 
@@ -141,7 +141,7 @@ namespace Build.Editor
             var afterV = description.LastIndexOf('v') + 1;
             var majorAndMinor = description[afterV..];
             minorDot = majorAndMinor.LastIndexOf('.');
-            lines = CountCommitLogLinesSinceGitTag(tag);
+            lines = GetCommitLogLinesSinceGitTag(tag);
             return majorAndMinor;
         }
 
