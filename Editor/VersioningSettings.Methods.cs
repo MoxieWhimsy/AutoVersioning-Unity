@@ -128,6 +128,14 @@ namespace Build.Editor
         private static string GetMajorAndMinorFromGit(out string hash, out int minorDot, out string[] lines)
         {
             var description = GetGitDescription();
+            if (string.IsNullOrEmpty(description))
+            {
+                Debug.LogError($"Could not get description from Git. Are you sure this is a Git repo?");
+                minorDot = -1;
+                lines = new string[] { };
+                hash = "not git";
+                return string.Empty;
+            }
             var hashDash = description.LastIndexOf('-');
             hash = description[(hashDash + 1)..];
             description = description[..hashDash];
