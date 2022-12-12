@@ -1,7 +1,6 @@
 #if UNITY_EDITOR
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
 using RedBlueGames;
 using UnityEngine;
 
@@ -10,7 +9,6 @@ namespace Build.Editor
     public partial class VersioningSettings
     {
         private const string VersionTagRegex = @"""*v[0-9]*""";
-        public static Regex PlasticVersionTagRegex => new(@"^version-tag:");
 
         private int CountBothMinorAndPatch(IEnumerable<string> lines)
             => lines.Count(line => UnionRegex.IsMatch(line));
@@ -147,7 +145,7 @@ namespace Build.Editor
             return majorAndMinor;
         }
 
-        private static string GetMajorAndMinorFromPlastic(out string hash, out int minorDot, out string[] lines)
+        private string GetMajorAndMinorFromPlastic(out string hash, out int minorDot, out string[] lines)
         {
             lines = PlasticProcess.CommitLog.Split('\n');
             var statusHeader = new PlasticProcess(@"status --header", Application.dataPath).Run().Output;

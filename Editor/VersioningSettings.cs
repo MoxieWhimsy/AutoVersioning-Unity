@@ -31,10 +31,13 @@ namespace Build.Editor
 
         [SerializeField] private string[] minorTags = { "feat" };
         [SerializeField] private string[] patchTags = { "fix", "asset", "adjust" };
+        [SerializeField] private string _plasticVersionTag = @"^version-tag:";
 
         public Regex MinorRegex => new(string.Join('|', minorTags.Select(tag => @$"^{tag}")));
         public Regex PatchRegex => new(string.Join('|', patchTags.Select(tag => @$"^{tag}")));
         public Regex UnionRegex => new(string.Join('|', minorTags.Union(patchTags).Select(tag => @$"^{tag}")));
+        public Regex PlasticVersionTagRegex => new(_plasticVersionTag);
+
         
         public enum NumberType
         {
