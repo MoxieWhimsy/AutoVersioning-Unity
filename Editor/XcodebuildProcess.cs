@@ -51,6 +51,8 @@ namespace Build.Editor
                     myProcess.EnableRaisingEvents = true;
                     myProcess.Exited += myProcess_Exited;
                     myProcess.Start();
+                    myProcess.BeginOutputReadLine();
+                    myProcess.BeginErrorReadLine();
                 }
                 catch (Exception ex)
                 {
@@ -64,12 +66,13 @@ namespace Build.Editor
         // Handle Exited event and display process information.
         private void myProcess_Exited(object sender, System.EventArgs e)
         {
-            var report = new Report();
-            report.arguments = arguments;
-            report.errors = myProcess.StandardError.ReadToEnd();
-            report.output = myProcess.StandardOutput.ReadToEnd();
-            report.exitCode = myProcess.ExitCode;
-            Completed?.Invoke(new Report());
+            var report = new Report
+            {
+                errors = myProcess.StandardError.ReadToEnd(),
+                output = myProcess.StandardOutput.ReadToEnd(),
+                exitCode = myProcess.ExitCode
+            };
+            Completed?.Invoke(report);
             Console.WriteLine(
                 $"Exit time    : {myProcess.ExitTime}\n" +
                 $"Exit code    : {myProcess.ExitCode}\n" +
@@ -81,7 +84,6 @@ namespace Build.Editor
         [Serializable]
         public struct Report
         {
-            public string arguments;
             public string output;
             public string errors;
             public int exitCode;
