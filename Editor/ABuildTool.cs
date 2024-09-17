@@ -21,6 +21,8 @@ namespace Build.Editor
         protected static event PreBuildDelegate OnBeforeBuild;
         protected static event PostBuildDelegate OnBuildSucceeded;
 
+        protected static BuildSummary MostRecentSummary { get; private set; }
+
         [System.Obsolete("Must specify build targets as parameters")]
         public static void UpdateMobileBuildNumbers()
         {
@@ -47,8 +49,8 @@ namespace Build.Editor
             }
         }
 
-        protected static void ArchiveIosBuild(string buildPath, XcodebuildProcess.ProcessOutput callback)
-            => XcodeBuild.RunAsync("archive -scheme Unity-iPhone -sdk iphoneos -allowProvisioningUpdates",
+        protected static async Task ArchiveIosBuild(string buildPath, XcodebuildProcess.ProcessOutput callback)
+            => await XcodeBuild.RunAsync("archive -scheme Unity-iPhone -sdk iphoneos -allowProvisioningUpdates",
                 buildPath, callback);
 
         protected static void AddAppUsesExemptEncryption(string buildPath)
@@ -104,6 +106,7 @@ namespace Build.Editor
             var report = BuildPipeline.BuildPlayer(buildPlayerOptions);
             var summary = report.summary;
             Debug.Log($"Build Platform: {summary.platform}");
+            MostRecentSummary = summary;
 
             switch (summary.result)
             {
