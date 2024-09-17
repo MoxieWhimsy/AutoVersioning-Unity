@@ -188,6 +188,22 @@ namespace Build.Editor
 
             return version;
         }
+        
+        private static void HandleMobileBuildNumber(BuildTarget target)
+        {
+            if (target != BuildTarget.Android && target != BuildTarget.iOS) return;
+            ABuildTool.UpdateMobileBuildNumbers(target);
+        }
+
+        public static void PrebuildVersionUpdate(BuildTarget target)
+        {
+            if (!GetOrCreateVersionData(out var versionData)) return;
+
+            versionData = UpdateVersionData();
+            HandleMobileBuildNumber(target);
+
+            PlayerSettings.bundleVersion = versionData ? versionData.Version : ShortBundle;
+        }
     }
 }
 #endif
