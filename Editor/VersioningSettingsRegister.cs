@@ -58,6 +58,7 @@ namespace Build.Editor
                         "Bundle Version Counts", settings));
                     properties.Add(GenPropertyField(VersioningSettings.MinorTagsProperty, "Minor Tags", settings));
                     properties.Add(GenPropertyField(VersioningSettings.PatchTagsProperty, "Patch Tags", settings));
+                    properties.Add(GenPropertyField(VersioningSettings.BuildTagsProperty, "Build Tags", settings));
                     var versionDataTitle = new Label("Version Data");
                     versionDataTitle.AddToClassList("title");
                     properties.Add(versionDataTitle);

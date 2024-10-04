@@ -31,19 +31,30 @@ namespace Build.Editor
 
         [SerializeField] private string[] minorTags = { "feat" };
         [SerializeField] private string[] patchTags = { "fix", "asset", "adjust" };
+        [SerializeField] private string[] buildTags = { "" };
         [SerializeField] private string _plasticVersionTag = @"^version-tag:";
 
-        public Regex MinorRegex => new(string.Join('|', minorTags.Select(tag => @$"^{tag}")));
-        public Regex PatchRegex => new(string.Join('|', patchTags.Select(tag => @$"^{tag}")));
-        public Regex UnionRegex => new(string.Join('|', minorTags.Union(patchTags).Select(tag => @$"^{tag}")));
+        public Regex MinorRegex => new(string.Join('|', minorTags.Select(tag => $"^{tag}")));
+        public Regex PatchRegex => new(string.Join('|', patchTags.Select(tag => $"^{tag}")));
+
+        public Regex MinorPatchRegex => new(string.Join('|', minorTags.Union(patchTags).Select(tag => $"^{tag}")));
+
+        public Regex MinorPatchBuildRegex
+            => new(string.Join('|', minorTags.Union(patchTags).Union(buildTags).Select(tag => $"^{tag}")));
+        public Regex PatchBuildRegex
+            => new(string.Join('|', patchTags.Union(buildTags).Select(tag => $"^{tag}")));
+
         public Regex PlasticVersionTagRegex => new(_plasticVersionTag);
 
         
         public enum NumberType
         {
-            BothMinorAndPatch,
-            MinorThenPatch,
-            MainAndBranch,
+            BothMinorAndPatch = 0,
+            MinorThenPatch = 1,
+            MainAndBranch = 2,
+            PatchAndBuild = 3,
+            MinorThenPatchAndBuild = 4,
+            MinorAndPatchAndBuild = 5,
         }
 
         public enum VersionControl
@@ -60,6 +71,7 @@ namespace Build.Editor
         public static string MinorTagsProperty => nameof(minorTags);
         public static string NumberOffsetProperty => nameof(numberOffset);
         public static string PatchTagsProperty => nameof(patchTags);
+        public static string BuildTagsProperty => nameof(buildTags);
         public static string VersionControlSystemProperty => nameof(_versionControlSystem);
         
         private const string DefaultSettingsFolder = "Assets/Editor/Settings";

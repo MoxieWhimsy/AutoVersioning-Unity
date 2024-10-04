@@ -11,7 +11,13 @@ namespace Build.Editor
         private const string VersionTagRegex = @"""*v[0-9]*""";
 
         private int CountBothMinorAndPatch(IEnumerable<string> lines)
-            => lines.Count(line => UnionRegex.IsMatch(line));
+            => lines.Count(line => MinorPatchRegex.IsMatch(line));
+        
+        private int CountPatchAndBuild(IEnumerable<string> lines)
+            => lines.Count(line => PatchBuildRegex.IsMatch(line));
+
+        private int CountMinorAndPatchAndBuild(IEnumerable<string> lines)
+            => lines.Count(line => MinorPatchBuildRegex.IsMatch(line));
 
         /// <summary>
         /// Returns the number of commits on main up to the commit where this branch connects to main.
@@ -30,7 +36,7 @@ namespace Build.Editor
 
         private int CountMinorThenPatch(string[] lines)
         {
-            var patch = GetMinorAndThenPatch(lines, out var minor);
+            var patch = GetMinorAndThenPatch(lines, out var minor, false);
             return MaxPatchesPerMinor * minor + patch;
         }
 
@@ -56,6 +62,8 @@ namespace Build.Editor
             NumberType.BothMinorAndPatch => CountBothMinorAndPatch(lines),
             NumberType.MinorThenPatch => CountMinorThenPatch(lines),
             NumberType.MainAndBranch => CountMainAndBranch(lines),
+            NumberType.MinorAndPatchAndBuild => CountMinorAndPatchAndBuild(lines),
+            NumberType.PatchAndBuild => CountPatchAndBuild(lines), 
             _ => 0
         } + numberOffset;
 
@@ -77,8 +85,9 @@ namespace Build.Editor
             var patch = _bundleVersionStyle switch
             {
                 NumberType.BothMinorAndPatch => CountBothMinorAndPatch(lines),
-                NumberType.MinorThenPatch => GetMinorAndThenPatch(lines, out minorFromLines),
+                NumberType.MinorThenPatch => GetMinorAndThenPatch(lines, out minorFromLines, false),
                 NumberType.MainAndBranch => CountMainAndBranch(lines),
+                NumberType.MinorThenPatchAndBuild => GetMinorAndThenPatch(lines, out minorFromLines, true),
                 _ => 0
             };
 
@@ -139,11 +148,9 @@ namespace Build.Editor
             var hashDash = description.LastIndexOf('-');
             hash = description[(hashDash + 1)..];
             description = description[..hashDash];
-            Debug.Log($"d:{description} h:{hash}");
             var commitsDash = description.LastIndexOf('-');
             var commits = int.Parse(description[(commitsDash + 1)..]);
             description = description[..commitsDash];
-            Debug.Log($"d:{description} p:{commits} h:{hash}");
             var tag = description;
 
             var afterV = description.LastIndexOf('v') + 1;
@@ -188,11 +195,13 @@ namespace Build.Editor
         }
 
 
-        internal int GetMinorAndThenPatch(string[] lines, out int minor)
+        internal int GetMinorAndThenPatch(string[] lines, out int minor, bool withBuild)
         {
             minor = lines.Count(line => MinorRegex.IsMatch(line));
             lines = lines.TakeWhile(line => !MinorRegex.IsMatch(line)).ToArray();
-            return lines.Count(line => PatchRegex.IsMatch(line));
+            return withBuild
+                ? lines.Count(line => PatchBuildRegex.IsMatch(line))
+                : lines.Count(line => PatchRegex.IsMatch(line));
         }
 
         private string GetWhichCommitBranchesFromMain()

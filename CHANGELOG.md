@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 + Move Update Version Data menu item to top of Version Data submenu
 + Gather optional counts like Branch Count and number of uncommitted Changes into Bonus field
 + Relabel Build Tool & Versioning settings page
++ Build Tags allow advancing build number separate from version numbers
 
 ### Fixed
 + error from asynchronous writing to linear stream in AddAppUsesExemptEncryption method of ABuildTool  
