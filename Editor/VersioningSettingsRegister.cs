@@ -64,6 +64,8 @@ namespace Build.Editor
                     properties.Add(versionDataTitle);
                     properties.Add(GenPropertyField(VersioningSettings.IncludeBranchCountProperty,
                         "Include Branch Count", settings));
+                    properties.Add(GenPropertyField(VersioningSettings.IncludeHashCodeProperty, 
+                        "Include Hash Code", settings));
                     properties.Add(GenPropertyField(VersioningSettings.IncludeStatusChangesProperty,
                         "Include Number of Changes", settings));
 
@@ -87,7 +89,8 @@ namespace Build.Editor
             preview.AddToClassList("property-list");
             preview.Add(new Label(data.Version));
             preview.Add(new Label(data.Number.ToString()));
-            preview.Add(new Label(data.Hash));
+            if (!string.IsNullOrWhiteSpace(data.Hash))
+                preview.Add(new Label(data.Hash));
             var box = new Box();
             box.Add(title);
             box.Add(preview);

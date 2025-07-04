@@ -147,7 +147,7 @@ namespace Build.Editor
             if (Settings.GetBuildVersion(out var memo, out var hash))
             {
                 data.Version = memo;
-                data.Hash = hash;
+                data.Hash = Settings.IncludeHashCode ? hash : string.Empty;
             }
 
             if (GetBuildNumber(out var number))

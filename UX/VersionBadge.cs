@@ -25,9 +25,9 @@ namespace Build.UX
         private void DisplayVersion()
         {
             if (!_versionData) return;
-            if (_version) _version.SetText(_versionData.Version);
-            if (_build) _build.SetText($"{_versionData.Number}");
-            if (_hash) _hash.SetText($"{_versionData.Hash}");
+            if (_version) _version.SetText($"Version: {_versionData.Version}");
+            if (_build) _build.SetText($"Build: {_versionData.Number}");
+            if (_hash) _hash.SetText($"Hash: {_versionData.Hash}");
         }
         
         [ContextMenu(nameof(GrabVersionDataFromResources))]

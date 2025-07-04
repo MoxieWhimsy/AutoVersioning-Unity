@@ -20,6 +20,7 @@ namespace Build.Editor
 
         [SerializeField] private int numberOffset;
         [SerializeField] private bool includeBranchCount;
+        [field: SerializeField] public bool IncludeHashCode { get; set; }
         [SerializeField] private bool includeStatusChanges;
         public bool IncludeBranchCount => includeBranchCount;
         public bool IncludeChanges => includeStatusChanges;
@@ -66,6 +67,7 @@ namespace Build.Editor
         public static string BundleVersionStyleProperty => nameof(_bundleVersionStyle);
         public static string CommitCountingStyleProperty => nameof(_commitCountingStyle);
         public static string IncludeBranchCountProperty => nameof(includeBranchCount);
+        public static string IncludeHashCodeProperty => $"<{nameof(IncludeHashCode)}>k__BackingField";
         public static string IncludeStatusChangesProperty => nameof(includeStatusChanges);
         public static string MainBranchNameProperty => nameof(mainBranchName);
         public static string MinorTagsProperty => nameof(minorTags);
