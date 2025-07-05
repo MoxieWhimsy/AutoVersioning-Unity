@@ -122,7 +122,7 @@ namespace Build.Editor
             catch (GitException exception)
             {
                 Debug.LogError($"{nameof(Versioning)}: exit code = {exception.ExitCode}\n{exception.Message}");
-                return string.Empty;
+                return $"exit code = {exception.ExitCode}";
             }
         }
 
@@ -137,11 +137,16 @@ namespace Build.Editor
         private static string GetMajorAndMinorFromGit(out string hash, out int minorDot, out string[] lines)
         {
             var description = GetGitDescription();
-            if (string.IsNullOrEmpty(description))
+            if (description.StartsWith("exit code") || string.IsNullOrEmpty(description))
             {
                 Debug.LogError($"Could not get description from Git. Are you sure this is a Git repo?");
                 minorDot = -1;
                 lines = new string[] { };
+                if (description.EndsWith("128"))
+                {
+                    hash = "no tags";
+                    return "0.0";
+                }
                 hash = "not git";
                 return string.Empty;
             }

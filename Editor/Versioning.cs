@@ -143,7 +143,12 @@ namespace Build.Editor
         
         public static VersionData UpdateVersionData()
         {
-            var data = VersionData.GetFromResources();
+            if (!GetOrCreateVersionData(out var data))
+            {
+                Debug.LogError("No version data!");
+                return data;
+            }
+
             if (Settings.GetBuildVersion(out var memo, out var hash))
             {
                 data.Version = memo;
