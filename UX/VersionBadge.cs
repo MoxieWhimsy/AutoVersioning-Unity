@@ -8,6 +8,7 @@ namespace Build.UX
         [SerializeField] private TMP_Text _version;
         [SerializeField] private TMP_Text _build;
         [SerializeField] private TMP_Text _hash;
+        [SerializeField] private TMP_Text _bonus;
         
         [SerializeField] private VersionData _versionData;
         
@@ -28,6 +29,7 @@ namespace Build.UX
             if (_version) _version.SetText($"Version: {_versionData.Version}");
             if (_build) _build.SetText($"Build: {_versionData.Number}");
             if (_hash) _hash.SetText($"Hash: {_versionData.Hash}");
+            if (_bonus) _bonus.SetText(_versionData.TryGetBonusStrings(out var bonus) ? bonus : "No notes!");
         }
         
         [ContextMenu(nameof(GrabVersionDataFromResources))]

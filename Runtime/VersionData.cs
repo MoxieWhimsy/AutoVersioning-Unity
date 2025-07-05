@@ -71,6 +71,14 @@ namespace Build
 			debug = string.Empty;
 		}
 
+		public bool TryGetBonusStrings(out string result)
+		{
+			result = Bonus;
+			if (!string.IsNullOrWhiteSpace(Hash))
+				result += $"Hash: {hash} ";
+			return !string.IsNullOrWhiteSpace(result);
+		}
+
 		public void SetDebug(string memo = null)
 		{
 			debug = string.IsNullOrWhiteSpace(debug) && string.IsNullOrWhiteSpace(memo) ? "true" : memo;
